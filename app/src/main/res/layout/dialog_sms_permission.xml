@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SMS Notifications"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="This app can send low stock alerts via SMS.\n\nWould you like to enable SMS notifications?"
+        android:textSize="16sp"
+        android:layout_marginBottom="24dp" />
+
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Permission Status: Checking..."
+        android:textSize="14sp"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/btnRequestPermission"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Grant SMS Permission"
+        android:layout_marginBottom="8dp" />
+
+    <Button
+        android:id="@+id/btnTestNotification"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Send Test Alert"
+        android:layout_marginBottom="8dp" />
+
+    <Button
+        android:id="@+id/btnClose"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Close"
+        android:backgroundTint="@android:color/darker_gray" />
+
+</LinearLayout>
