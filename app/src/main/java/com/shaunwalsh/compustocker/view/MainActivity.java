@@ -1,4 +1,4 @@
-package com.shaunwalsh.compustocker.controller;
+package com.shaunwalsh.compustocker.view;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +13,8 @@ import androidx.core.view.WindowInsetsCompat;
 import com.shaunwalsh.compustocker.R;
 import com.shaunwalsh.compustocker.model.User;
 import com.shaunwalsh.compustocker.services.DatabaseManager;
+import com.shaunwalsh.compustocker.services.PasswordHasher;
+import com.shaunwalsh.compustocker.session.SessionManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -53,17 +55,16 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        User user = DatabaseManager.getDbHelper().getUser(username, password);
-
-        if (user != null) {
-            Toast.makeText(this, "Login Successful, " + user.getUsername(), Toast.LENGTH_SHORT).show();
-
-            Intent intent = new Intent(MainActivity.this, InventoryActivity.class);
-            startActivity(intent);
-            finish();
-        } else {
+        User user = DatabaseManager.getDbHelper().getUserByUsername(username);
+        if (user == null || !PasswordHasher.matches(password, user.getPasswordSalt(), user.getPassword())) {
             Toast.makeText(this, "Invalid username or password", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        new SessionManager(this).startSession(user);
+        Toast.makeText(this, "Login Successful, " + user.getUsername(), Toast.LENGTH_SHORT).show();
+        startActivity(new Intent(MainActivity.this, InventoryActivity.class));
+        finish();
     }
 
     private void attemptRegister() {
@@ -74,21 +75,25 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Please enter username and password to register", Toast.LENGTH_SHORT).show();
             return;
         }
+        if (password.length() < 6) {
+            Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        //Check to make sure there are no duplicates
-        if (DatabaseManager.getDbHelper().getUser(username, password) != null) {
+        if (DatabaseManager.getDbHelper().getUserByUsername(username) != null) {
             Toast.makeText(this, "User already exists. Please login instead.", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        String salt = PasswordHasher.newSalt();
         User newUser = new User();
         newUser.setUsername(username);
-        newUser.setPassword(password);
+        newUser.setPasswordSalt(salt);
+        newUser.setPassword(PasswordHasher.hash(password, salt));
         newUser.setFullName(username);
         newUser.setRole("employee");
 
         long result = DatabaseManager.getDbHelper().addUser(newUser);
-
         if (result > 0) {
             Toast.makeText(this, "Registration Successful! You can now login.", Toast.LENGTH_SHORT).show();
         } else {

@@ -16,7 +16,7 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "pc_inventory.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
 
     // Table Names
     public static final String TABLE_USERS = "users";
@@ -34,6 +34,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "username TEXT UNIQUE NOT NULL, " +
                 "password TEXT NOT NULL, " +
+                "password_salt TEXT, " +
                 "full_name TEXT, " +
                 "role TEXT)");
 
@@ -51,6 +52,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "part_number TEXT, " +
                 "category_id INTEGER, " +
                 "quantity INTEGER DEFAULT 0, " +
+                "min_quantity INTEGER DEFAULT 0, " +
                 "price REAL, " +
                 "manufacturer TEXT, " +
                 "description TEXT, " +
@@ -59,10 +61,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CATEGORIES);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ITEMS);
-        onCreate(db);
+        if (oldVersion < 2) {
+            db.execSQL(
+                    "ALTER TABLE " + TABLE_ITEMS + " ADD COLUMN min_quantity INTEGER DEFAULT 0"
+            );
+        }
+        if (oldVersion < 3) {
+            db.execSQL("ALTER TABLE " + TABLE_USERS + " ADD COLUMN password_salt TEXT");
+        }
     }
 
     // ===================================================================
@@ -74,6 +80,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put("username", user.getUsername());
         values.put("password", user.getPassword());
+        values.put("password_salt", user.getPasswordSalt());
         values.put("full_name", user.getFullName());
         values.put("role", user.getRole());
 
@@ -92,6 +99,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             user.setId(cursor.getInt(cursor.getColumnIndexOrThrow("id")));
             user.setUsername(cursor.getString(cursor.getColumnIndexOrThrow("username")));
             user.setPassword(cursor.getString(cursor.getColumnIndexOrThrow("password")));
+            user.setFullName(cursor.getString(cursor.getColumnIndexOrThrow("full_name")));
+            user.setRole(cursor.getString(cursor.getColumnIndexOrThrow("role")));
+            cursor.close();
+            return user;
+        }
+        if (cursor != null) cursor.close();
+        return null;
+    }
+
+    public User getUserByUsername(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_USERS, null,
+                "username=?", new String[]{username},
+                null, null, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            User user = new User();
+            user.setId(cursor.getInt(cursor.getColumnIndexOrThrow("id")));
+            user.setUsername(cursor.getString(cursor.getColumnIndexOrThrow("username")));
+            user.setPassword(cursor.getString(cursor.getColumnIndexOrThrow("password")));
+            int saltCol = cursor.getColumnIndex("password_salt");
+            if (saltCol >= 0) {
+                user.setPasswordSalt(cursor.getString(saltCol));
+            }
             user.setFullName(cursor.getString(cursor.getColumnIndexOrThrow("full_name")));
             user.setRole(cursor.getString(cursor.getColumnIndexOrThrow("role")));
             cursor.close();
@@ -165,6 +196,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("part_number", item.getPartNumber());
         values.put("category_id", item.getCategoryId());
         values.put("quantity", item.getQuantity());
+        values.put("min_quantity", item.getMinquantity());
         values.put("price", item.getPrice());
         values.put("manufacturer", item.getManufacturer());
         values.put("description", item.getDescription());
@@ -185,6 +217,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 item.setPartNumber(cursor.getString(cursor.getColumnIndexOrThrow("part_number")));
                 item.setCategoryId(cursor.getInt(cursor.getColumnIndexOrThrow("category_id")));
                 item.setQuantity(cursor.getInt(cursor.getColumnIndexOrThrow("quantity")));
+                item.setMinQuantity(cursor.getInt(cursor.getColumnIndexOrThrow("min_quantity")));
                 item.setPrice(cursor.getDouble(cursor.getColumnIndexOrThrow("price")));
                 item.setManufacturer(cursor.getString(cursor.getColumnIndexOrThrow("manufacturer")));
                 item.setDescription(cursor.getString(cursor.getColumnIndexOrThrow("description")));

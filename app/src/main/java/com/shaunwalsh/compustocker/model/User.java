@@ -7,6 +7,8 @@ public class User {
     private String fullName;
     private String role;
 
+    private String passwordSalt;
+
     public User() {}
 
     public User(String username, String password, String fullName)
@@ -30,4 +32,7 @@ public class User {
 
     public String getRole() {return role;}
     public void setRole(String role) {this.role = role;}
+
+    public String getPasswordSalt() { return passwordSalt; }
+    public void setPasswordSalt(String value) { passwordSalt = value; }
 }

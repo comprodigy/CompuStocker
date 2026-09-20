@@ -18,11 +18,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CompuStocker">
         <activity
-            android:name=".controller.SMSNotificationActivity"
+            android:name=".view.SMSNotificationActivity"
             android:exported="false"
             android:theme="@style/Theme.CompuStocker" />
         <activity
-            android:name=".controller.MainActivity"
+            android:name=".view.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,7 +31,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".controller.InventoryActivity"
+            android:name=".view.InventoryActivity"
             android:exported="false" />
     </application>
 

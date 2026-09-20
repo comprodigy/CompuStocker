@@ -1,4 +1,4 @@
-package com.shaunwalsh.compustocker.controller;
+package com.shaunwalsh.compustocker.view;
 
 import android.Manifest;
 import android.content.pm.PackageManager;

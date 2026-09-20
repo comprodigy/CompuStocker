@@ -80,6 +80,14 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.View
         notifyItemRemoved(position);
     }
 
+    public void replaceItems(List<InventoryItem> items) {
+        this.itemList.clear();
+        if (items != null) {
+            this.itemList.addAll(items);
+        }
+        notifyDataSetChanged();
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvItemName, tvPartNumber, tvMinQuantity;
         EditText etQuantity;
